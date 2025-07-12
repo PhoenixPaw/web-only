@@ -1,0 +1,63 @@
+[1mdiff --git a/CNAME b/CNAME[m
+[1mindex 428f705..2aec8e6 100644[m
+[1m--- a/CNAME[m
+[1m+++ b/CNAME[m
+[36m@@ -1 +1,5 @@[m
+[31m-stakingphxpw.com[m
+\ No newline at end of file[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32mstakingphxpw.com[m[41m [m
+[32m+[m[32m=======[m
+[32m+[m[32mstakingphxpw.com[m
+[32m+[m[32m>>>>>>> 740625ffe30e2c39560265ca4a7e165a3241ca8f[m
+[1mdiff --git a/index.html b/index.html[m
+[1mindex a035ea1..2689767 100644[m
+[1m--- a/index.html[m
+[1m+++ b/index.html[m
+[36m@@ -3,6 +3,12 @@[m
+ <head>[m
+     <meta charset="UTF-8">[m
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32m    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">[m
+[32m+[m[32m    <meta http-equiv="Pragma" content="no-cache">[m
+[32m+[m[32m    <meta http-equiv="Expires" content="0">[m
+[32m+[m[32m=======[m
+[32m+[m[32m>>>>>>> 740625ffe30e2c39560265ca4a7e165a3241ca8f[m
+     <title>PHXPW Staking - Подключение кошелька</title>[m
+     <script src="tonconnect-ui.min.js"></script>[m
+     <script src="https://telegram.org/js/telegram-web-app.js" defer></script>[m
+[1mdiff --git a/privacy.html b/privacy.html[m
+[1mindex 1e66fde..a5e371c 100644[m
+[1m--- a/privacy.html[m
+[1m+++ b/privacy.html[m
+[36m@@ -3,6 +3,12 @@[m
+ <head>[m
+     <meta charset="UTF-8">[m
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32m    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">[m
+[32m+[m[32m    <meta http-equiv="Pragma" content="no-cache">[m
+[32m+[m[32m    <meta http-equiv="Expires" content="0">[m
+[32m+[m[32m=======[m
+[32m+[m[32m>>>>>>> 740625ffe30e2c39560265ca4a7e165a3241ca8f[m
+     <title>Политика конфиденциальности - PHXPW Staking</title>[m
+     <style>[m
+         body { [m
+[1mdiff --git a/terms.html b/terms.html[m
+[1mindex 8d4ebd5..ffb5075 100644[m
+[1m--- a/terms.html[m
+[1m+++ b/terms.html[m
+[36m@@ -3,6 +3,12 @@[m
+ <head>[m
+     <meta charset="UTF-8">[m
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">[m
+[32m+[m[32m<<<<<<< HEAD[m
+[32m+[m[32m    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">[m
+[32m+[m[32m    <meta http-equiv="Pragma" content="no-cache">[m
+[32m+[m[32m    <meta http-equiv="Expires" content="0">[m
+[32m+[m[32m=======[m
+[32m+[m[32m>>>>>>> 740625ffe30e2c39560265ca4a7e165a3241ca8f[m
+     <title>Условия использования - PHXPW Staking</title>[m
+     <style>[m
+         body { [m
