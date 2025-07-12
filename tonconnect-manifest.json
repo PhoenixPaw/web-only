@@ -1,0 +1,12 @@
+{
+    "url": "https://stakingphxpw.com",
+    "name": "PHXPW Staking",
+    "iconUrl": "https://stakingphxpw.com/logo.png",
+    "termsOfUseUrl": "https://stakingphxpw.com/terms.html",
+    "privacyPolicyUrl": "https://stakingphxpw.com/privacy.html",
+    "features": [
+        "ton_addr",
+        "ton_proof",
+        "ton_send_tx"
+    ]
+} 
