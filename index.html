@@ -412,6 +412,105 @@
         .fade-in-up {
             animation: fadeInUp 0.6s ease-out;
         }
+
+        /* Фильтры стили */
+        .filters-container {
+            background: rgba(255, 72, 0, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255, 72, 0, 0.1);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-label {
+            color: var(--text-color);
+            font-size: 0.9em;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 72, 0, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--lava-color-1);
+            box-shadow: 0 0 0 2px rgba(255, 72, 0, 0.2);
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid rgba(255, 72, 0, 0.3);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 0.9em;
+            cursor: pointer;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn.primary {
+            background: var(--lava-color-1);
+            color: white;
+        }
+
+        .filter-btn.secondary {
+            background: rgba(255, 72, 0, 0.1);
+            color: var(--lava-color-1);
+            border: 1px solid rgba(255, 72, 0, 0.3);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 72, 0, 0.2);
+        }
+
+        .filter-results {
+            color: var(--text-color-muted);
+            font-size: 0.9em;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .no-results {
+            text-align: center;
+            color: var(--text-color-muted);
+            padding: 30px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -1083,6 +1182,9 @@
                     <h2 style="color: var(--lava-color-1); text-align: center; margin-bottom: 30px;">
                         📊 Ваша статистика PHXPW
                     </h2>
+                    <div style="text-align:right; margin-bottom:10px;">
+                      <button id="export-btn" class="filter-btn primary" style="float:right;">⬇️ Экспортировать</button>
+                    </div>
                     
                     <div class="stats-grid">
                         <div class="stat-card">
@@ -1149,10 +1251,51 @@
                     </div>
                     
                     <h3 style="color: var(--lava-color-1); margin: 30px 0 20px 0;">📜 История операций</h3>
-                    <div class="tx-history-list">
+                    <div class="filters-container">
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label class="filter-label">🔍 Поиск</label>
+                                <input type="text" id="search-filter" class="filter-input" placeholder="Поиск по типу операции...">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">📅 Тип операции</label>
+                                <select id="type-filter" class="filter-select">
+                                    <option value="">Все типы</option>
+                                    <option value="stake">Стейкинг</option>
+                                    <option value="reward">Награда</option>
+                                    <option value="transfer">Перевод</option>
+                                    <option value="swap">Обмен</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">📊 Период</label>
+                                <select id="period-filter" class="filter-select">
+                                    <option value="">Все время</option>
+                                    <option value="today">Сегодня</option>
+                                    <option value="week">Неделя</option>
+                                    <option value="month">Месяц</option>
+                                    <option value="year">Год</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">💰 Сумма от</label>
+                                <input type="number" id="amount-min" class="filter-input" placeholder="0" step="0.000001">
+                            </div>
+                            <div class="filter-group">
+                                <label class="filter-label">💰 Сумма до</label>
+                                <input type="number" id="amount-max" class="filter-input" placeholder="∞" step="0.000001">
+                            </div>
+                        </div>
+                        <div class="filter-buttons">
+                            <button class="filter-btn primary" onclick="applyFilters()">🔍 Применить фильтры</button>
+                            <button class="filter-btn secondary" onclick="clearFilters()">🗑️ Очистить</button>
+                        </div>
+                        <div class="filter-results" id="filter-results"></div>
+                    </div>
+                    <div class="tx-history-list" id="tx-history-container">
                         ${data.tx_history && data.tx_history.length > 0 ?
                             data.tx_history.map(tx => `
-                                <div class="tx-history-item">
+                                <div class="tx-history-item" data-type="${tx.type || ''}" data-amount="${tx.amount || 0}" data-date="${tx.date || ''}">
                                     <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <div>
                                             <strong style="color: var(--text-color);">${tx.type}</strong>
@@ -1523,6 +1666,142 @@
             fetchAndRenderUserStats(tg_id);
             statsInterval = setInterval(() => fetchAndRenderUserStats(tg_id), 30000);
         }
+
+        // Глобальная переменная для хранения всех транзакций
+        let allTransactions = [];
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('search-filter').value.toLowerCase();
+            const typeFilter = document.getElementById('type-filter').value;
+            const periodFilter = document.getElementById('period-filter').value;
+            const amountMin = parseFloat(document.getElementById('amount-min').value) || 0;
+            const amountMax = parseFloat(document.getElementById('amount-max').value) || Infinity;
+
+            const filteredTransactions = allTransactions.filter(tx => {
+                // Поиск по тексту
+                const matchesSearch = !searchTerm || 
+                    (tx.type && tx.type.toLowerCase().includes(searchTerm)) ||
+                    (tx.amount && tx.amount.toString().includes(searchTerm));
+
+                // Фильтр по типу
+                const matchesType = !typeFilter || tx.type === typeFilter;
+
+                // Фильтр по периоду
+                let matchesPeriod = true;
+                if (periodFilter && tx.date) {
+                    const txDate = new Date(tx.date);
+                    const now = new Date();
+                    const diffTime = now - txDate;
+                    const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+                    switch (periodFilter) {
+                        case 'today':
+                            matchesPeriod = diffDays <= 1;
+                            break;
+                        case 'week':
+                            matchesPeriod = diffDays <= 7;
+                            break;
+                        case 'month':
+                            matchesPeriod = diffDays <= 30;
+                            break;
+                        case 'year':
+                            matchesPeriod = diffDays <= 365;
+                            break;
+                    }
+                }
+
+                // Фильтр по сумме
+                const txAmount = parseFloat(tx.amount) || 0;
+                const matchesAmount = txAmount >= amountMin && txAmount <= amountMax;
+
+                return matchesSearch && matchesType && matchesPeriod && matchesAmount;
+            });
+
+            renderFilteredTransactions(filteredTransactions);
+        }
+
+        function clearFilters() {
+            document.getElementById('search-filter').value = '';
+            document.getElementById('type-filter').value = '';
+            document.getElementById('period-filter').value = '';
+            document.getElementById('amount-min').value = '';
+            document.getElementById('amount-max').value = '';
+            
+            renderFilteredTransactions(allTransactions);
+        }
+
+        function renderFilteredTransactions(transactions) {
+            const container = document.getElementById('tx-history-container');
+            const resultsDiv = document.getElementById('filter-results');
+            
+            if (transactions.length === 0) {
+                container.innerHTML = '<div class="no-results">🔍 По вашему запросу ничего не найдено</div>';
+                resultsDiv.innerHTML = `Показано: 0 из ${allTransactions.length} операций`;
+            } else {
+                container.innerHTML = transactions.map(tx => `
+                    <div class="tx-history-item" data-type="${tx.type || ''}" data-amount="${tx.amount || 0}" data-date="${tx.date || ''}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong style="color: var(--text-color);">${tx.type}</strong>
+                                ${tx.amount ? `<div style="color: var(--lava-color-1); font-size: 0.9em;">Сумма: ${tx.amount}</div>` : ''}
+                            </div>
+                            <div style="color: var(--text-color-muted); font-size: 0.8em;">
+                                ${tx.date || 'Неизвестно'}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                resultsDiv.innerHTML = `Показано: ${transactions.length} из ${allTransactions.length} операций`;
+            }
+        }
+
+        function openExportModal() {
+          document.getElementById('export-modal').style.display = 'flex';
+        }
+        function closeExportModal() {
+          document.getElementById('export-modal').style.display = 'none';
+        }
+        async function downloadExport(format) {
+          closeExportModal();
+          const tg_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+          if (!tg_id) {
+            alert('Ошибка: не удалось получить ваш Telegram ID');
+            return;
+          }
+          try {
+            const res = await fetch(`/api/export_stats?tg_id=${tg_id}&format=${format}`);
+            if (!res.ok) throw new Error('Ошибка экспорта: ' + res.statusText);
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `phxpw_stats_${tg_id}.${format}`;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              window.URL.revokeObjectURL(url);
+              a.remove();
+            }, 200);
+          } catch (e) {
+            alert('Ошибка экспорта: ' + e.message);
+          }
+        }
+
+        setTimeout(() => {
+          const exportBtn = document.getElementById('export-btn');
+          if (exportBtn) exportBtn.onclick = openExportModal;
+        }, 100);
     </script>
+
+    <div id="export-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#222; border-radius:12px; padding:30px 40px; min-width:300px; max-width:90vw; box-shadow:0 8px 32px rgba(255,72,0,0.2); text-align:center;">
+        <h3 style="color:var(--lava-color-1); margin-bottom:20px;">Экспортировать статистику</h3>
+        <p style="color:var(--text-color-muted); margin-bottom:20px;">Выберите формат файла:</p>
+        <button class="filter-btn primary" style="margin:10px;" onclick="downloadExport('csv')">CSV</button>
+        <button class="filter-btn secondary" style="margin:10px;" onclick="downloadExport('pdf')">PDF</button>
+        <br>
+        <button class="filter-btn" style="margin-top:20px; background:#333; color:#fff;" onclick="closeExportModal()">Отмена</button>
+      </div>
+    </div>
 </body>
 </html> 
