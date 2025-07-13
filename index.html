@@ -1866,7 +1866,9 @@
                         if (wallet) {
                             currentWallet = wallet;
                             currentChallenge = 'PHXPW-' + Date.now() + '-' + Math.floor(Math.random() * 1e8);
-                            signBtn.style.display = 'inline-block';
+                            if (signBtn) signBtn.style.display = 'inline-block';
+                            if (userStatsDiv) userStatsDiv.style.display = 'block';
+                            if (document.getElementById('user-actions')) document.getElementById('user-actions').style.display = 'block';
                             statusElement.innerHTML = t('wallet_connected', { address: wallet.account.address.slice(0,4) + '...' + wallet.account.address.slice(-4) });
                             statusElement.classList.add('visible');
                             userStatsDiv.style.display = 'block'; // Показываем статистику после подключения
