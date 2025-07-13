@@ -1473,6 +1473,16 @@
         </div>
     </div>
 
+    <!-- Добавляю секцию действий пользователя после блока #status -->
+    <div id="user-actions" style="display:none; margin-top:30px; text-align:center;">
+      <button class="filter-btn primary" id="stake-btn" style="margin:10px;">Застейкать PHXPW</button>
+      <button class="filter-btn primary" id="claim-btn" style="margin:10px;">Вывести награду</button>
+      <button class="filter-btn primary" id="stats-btn" style="margin:10px;">Статистика</button>
+      <button class="filter-btn primary" id="notif-btn" style="margin:10px;">Настройки уведомлений</button>
+      <button class="filter-btn primary" id="admin-btn" style="margin:10px; display:none;">Админ-панель</button>
+      <button class="filter-btn secondary" id="export-btn" style="margin:10px;">⬇️ Экспортировать</button>
+    </div>
+
     <script>
         // Функция для fallback кнопки
         function connectWallet() {
@@ -1837,8 +1847,8 @@
                     console.error('❌ Ошибка загрузки manifest файла:', error);
                 });
 
-            statusElement.innerHTML = '✅ Telegram WebApp API загружен';
-            statusElement.classList.add('visible');
+                statusElement.innerHTML = '✅ Telegram WebApp API загружен';
+                statusElement.classList.add('visible');
 
             // TonConnect UI
             if (typeof TON_CONNECT_UI !== 'undefined' && TON_CONNECT_UI) {
@@ -1869,6 +1879,7 @@
                                     statusElement.innerHTML = '⚠️ Не удалось получить tg_id. Статистика не будет обновляться.';
                                 }
                             }
+                            showUserActions(/* isAdmin можно получить из initDataUnsafe */);
                         } else {
                             currentWallet = null;
                             currentChallenge = null;
@@ -1908,6 +1919,7 @@
                             } catch (e) {
                                 statusElement.innerHTML = t('signature_error', { error: e.message });
                             }
+                            showUserActions(/* isAdmin */);
                         };
                     }
                 } catch (error) {
@@ -2123,6 +2135,40 @@
           const exportBtn = document.getElementById('export-btn');
           if (exportBtn) exportBtn.onclick = openExportModal;
         }, 100);
+
+        // После успешного подключения кошелька или подписи:
+        function showUserActions(isAdmin = false) {
+          document.getElementById('user-actions').style.display = 'block';
+          document.getElementById('admin-btn').style.display = isAdmin ? 'inline-block' : 'none';
+        }
+
+        // Обработчики кнопок:
+        document.getElementById('stake-btn').onclick = function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'stake_phxpw' }));
+          }
+        };
+        document.getElementById('claim-btn').onclick = function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'claim_rewards' }));
+          }
+        };
+        document.getElementById('stats-btn').onclick = function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'user_stats' }));
+          }
+        };
+        document.getElementById('notif-btn').onclick = function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'notification_settings' }));
+          }
+        };
+        document.getElementById('admin-btn').onclick = function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'admin_panel' }));
+          }
+        };
+        // Экспорт уже реализован через export-btn
     </script>
 
     <div id="export-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
