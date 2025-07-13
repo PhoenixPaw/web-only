@@ -901,11 +901,7 @@
             const statusElement = document.getElementById('status');
             statusElement.innerHTML = '🔗 Открываем Tonkeeper...';
             statusElement.classList.add('visible');
-            
-            // Открываем Tonkeeper напрямую
             window.open('https://app.tonkeeper.com/', '_blank');
-            
-            // Показываем инструкцию
             setTimeout(() => {
                 statusElement.innerHTML = '📱 Откройте Tonkeeper и подключите кошелек вручную';
             }, 1000);
@@ -914,12 +910,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             // --- Accordion Logic ---
             const accordionHeaders = document.querySelectorAll('.accordion-header');
-            
             accordionHeaders.forEach(header => {
                 header.addEventListener('click', () => {
                     const content = header.nextElementSibling;
                     header.classList.toggle('active');
-
                     if (content.style.maxHeight) {
                         content.style.maxHeight = null;
                     } else {
@@ -928,12 +922,32 @@
                 });
             });
 
-            // --- TonConnect Logic ---
+            // --- TonConnect & Telegram WebApp Logic ---
             const tonConnectButton = document.getElementById('ton-connect-button');
             const fallbackConnect = document.getElementById('fallback-connect');
             const statusElement = document.getElementById('status');
+            const signBtn = document.getElementById('sign-btn');
             const returnButtonContainer = document.getElementById('return-button-container');
 
+            // Проверяем Telegram WebApp API
+            const isTelegramWebApp = window.Telegram && window.Telegram.WebApp;
+            if (!isTelegramWebApp) {
+                // Скрываем все элементы кошелька
+                if (tonConnectButton) tonConnectButton.style.display = 'none';
+                if (signBtn) signBtn.style.display = 'none';
+                statusElement.innerHTML = '⚠️ Для работы с кошельком откройте сайт через Telegram-бота.';
+                statusElement.classList.add('visible');
+                fallbackConnect.style.display = 'none';
+                // Можно добавить кнопку с deep link на бота
+                const tgLink = document.createElement('a');
+                tgLink.href = 'https://t.me/staking_PWbot';
+                tgLink.className = 'return-button visible';
+                tgLink.innerText = 'Открыть через Telegram';
+                returnButtonContainer.appendChild(tgLink);
+                return;
+            }
+
+            // Если Telegram WebApp есть — продолжаем как обычно
             // Проверяем загрузку manifest файла
             fetch('tonconnect-manifest.json')
                 .then(response => {
@@ -949,52 +963,56 @@
                     console.error('❌ Ошибка загрузки manifest файла:', error);
                 });
 
-            // Проверяем Telegram WebApp API
-            if (window.Telegram && window.Telegram.WebApp) {
-                console.log('✅ Telegram WebApp API загружен');
-                statusElement.innerHTML = '✅ Telegram WebApp API загружен';
-                statusElement.classList.add('visible');
-            } else {
-                console.log('❌ Telegram WebApp API недоступен');
-                statusElement.innerHTML = '❌ Telegram WebApp API недоступен';
-                statusElement.classList.add('visible');
-            }
+            statusElement.innerHTML = '✅ Telegram WebApp API загружен';
+            statusElement.classList.add('visible');
 
-            console.log('Начинаем инициализацию TonConnect...');
-            
-            // Проверяем, загрузилась ли библиотека
+            // TonConnect UI
             if (typeof TON_CONNECT_UI !== 'undefined' && TON_CONNECT_UI) {
-                console.log('TON_CONNECT_UI загружен, инициализируем...');
-                
-                // Инициализируем TonConnect ТОЛЬКО если библиотека доступна
                 try {
                     const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
                         manifestUrl: 'https://stakingphxpw.com/tonconnect-manifest.json',
                         buttonRootId: 'ton-connect-button'
                     });
-
                     tonConnectUI.uiOptions = {
                         twaReturnUrl: 'https://t.me/staking_PWbot'
                     };
-
                     let currentWallet = null;
                     let currentChallenge = null;
-
                     tonConnectUI.onStatusChange(async (wallet) => {
                         if (wallet) {
                             currentWallet = wallet;
-                            // Генерируем challenge (nonce)
                             currentChallenge = 'PHXPW-' + Date.now() + '-' + Math.floor(Math.random() * 1e8);
-                            document.getElementById('sign-btn').style.display = 'inline-block';
+                            signBtn.style.display = 'inline-block';
                             statusElement.innerHTML = `✅ Кошелек ${wallet.account.address.slice(0,4)}...${wallet.account.address.slice(-4)} подключен.<br>Нажмите "Подписать для подтверждения".`;
                             statusElement.classList.add('visible');
                         } else {
                             currentWallet = null;
                             currentChallenge = null;
-                            document.getElementById('sign-btn').style.display = 'none';
+                            signBtn.style.display = 'none';
                             statusElement.classList.remove('visible');
                         }
                     });
+                    if (signBtn) {
+                        signBtn.onclick = async function() {
+                            if (!currentWallet || !currentChallenge) return;
+                            try {
+                                const msg = new TextEncoder().encode(currentChallenge);
+                                const result = await tonConnectUI.wallet.signData(msg);
+                                if (window.Telegram && window.Telegram.WebApp) {
+                                    const payload = {
+                                        type: 'wallet_signature',
+                                        address: currentWallet.account.address,
+                                        challenge: currentChallenge,
+                                        signature: Array.from(result.signature)
+                                    };
+                                    window.Telegram.WebApp.sendData(JSON.stringify(payload));
+                                    statusElement.innerHTML = '✅ Подпись отправлена в бота!';
+                                }
+                            } catch (e) {
+                                statusElement.innerHTML = '❌ Ошибка подписи: ' + e.message;
+                            }
+                        };
+                    }
                 } catch (error) {
                     console.error('❌ Ошибка инициализации TonConnect:', error);
                     statusElement.innerHTML = '❌ Ошибка инициализации TonConnect. Используйте альтернативную кнопку.';
@@ -1008,33 +1026,6 @@
                 statusElement.classList.add('visible');
                 tonConnectButton.style.display = 'none';
                 fallbackConnect.style.display = 'block';
-            }
-
-            // Обработчик кнопки подписи
-            const signBtn = document.getElementById('sign-btn');
-            if (signBtn) {
-                signBtn.onclick = async function() {
-                    if (!currentWallet || !currentChallenge) return;
-                    try {
-                        // signData требует Uint8Array
-                        const msg = new TextEncoder().encode(currentChallenge);
-                        const result = await tonConnectUI.wallet.signData(msg);
-
-                        // Отправляем в Telegram WebApp
-                        if (window.Telegram && window.Telegram.WebApp) {
-                            const payload = {
-                                type: 'wallet_signature',
-                                address: currentWallet.account.address,
-                                challenge: currentChallenge,
-                                signature: Array.from(result.signature) // base64 или hex если нужно
-                            };
-                            window.Telegram.WebApp.sendData(JSON.stringify(payload));
-                            statusElement.innerHTML = '✅ Подпись отправлена в бота!';
-                        }
-                    } catch (e) {
-                        statusElement.innerHTML = '❌ Ошибка подписи: ' + e.message;
-                    }
-                };
             }
         });
     </script>
