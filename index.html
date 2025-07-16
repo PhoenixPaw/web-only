@@ -1871,7 +1871,7 @@
                             if (document.getElementById('user-actions')) document.getElementById('user-actions').style.display = 'block';
                             statusElement.innerHTML = t('wallet_connected', { address: wallet.account.address.slice(0,4) + '...' + wallet.account.address.slice(-4) });
                             statusElement.classList.add('visible');
-                            userStatsDiv.style.display = 'block'; // Показываем статистику после подключения
+                            if (userStatsDiv) userStatsDiv.style.display = 'block'; // Показываем статистику после подключения
                             // После подключения кошелька, получаем tg_id и запрашиваем статистику
                             if (window.Telegram && window.Telegram.WebApp) {
                                 const tg_id = window.Telegram.WebApp.initDataUnsafe.user?.id;
@@ -1885,9 +1885,9 @@
                         } else {
                             currentWallet = null;
                             currentChallenge = null;
-                            signBtn.style.display = 'none';
+                            if (signBtn) signBtn.style.display = 'none';
                             statusElement.classList.remove('visible');
-                            userStatsDiv.style.display = 'none'; // Скрываем статистику, если кошелек отключен
+                            if (userStatsDiv) userStatsDiv.style.display = 'none'; // Скрываем статистику, если кошелек отключен
                         }
                     });
                     if (signBtn) {
@@ -2140,37 +2140,58 @@
 
         // После успешного подключения кошелька или подписи:
         function showUserActions(isAdmin = false) {
-          document.getElementById('user-actions').style.display = 'block';
-          document.getElementById('admin-btn').style.display = isAdmin ? 'inline-block' : 'none';
+          const userActions = document.getElementById('user-actions');
+          const adminBtn = document.getElementById('admin-btn');
+          if (userActions) userActions.style.display = 'block';
+          if (adminBtn) adminBtn.style.display = isAdmin ? 'inline-block' : 'none';
+          
+          // Регистрируем обработчики кнопок
+          const stakeBtn = document.getElementById('stake-btn');
+          const claimBtn = document.getElementById('claim-btn');
+          const statsBtn = document.getElementById('stats-btn');
+          const notifBtn = document.getElementById('notif-btn');
+          const adminBtn2 = document.getElementById('admin-btn');
+          
+          if (stakeBtn) {
+            stakeBtn.onclick = function() {
+              if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'stake_phxpw' }));
+              }
+            };
+          }
+          
+          if (claimBtn) {
+            claimBtn.onclick = function() {
+              if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'claim_rewards' }));
+              }
+            };
+          }
+          
+          if (statsBtn) {
+            statsBtn.onclick = function() {
+              if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'user_stats' }));
+              }
+            };
+          }
+          
+          if (notifBtn) {
+            notifBtn.onclick = function() {
+              if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'notification_settings' }));
+              }
+            };
+          }
+          
+          if (adminBtn2) {
+            adminBtn2.onclick = function() {
+              if (window.Telegram && window.Telegram.WebApp) {
+                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'admin_panel' }));
+              }
+            };
+          }
         }
-
-        // Обработчики кнопок:
-        document.getElementById('stake-btn').onclick = function() {
-          if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'stake_phxpw' }));
-          }
-        };
-        document.getElementById('claim-btn').onclick = function() {
-          if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'claim_rewards' }));
-          }
-        };
-        document.getElementById('stats-btn').onclick = function() {
-          if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'user_stats' }));
-          }
-        };
-        document.getElementById('notif-btn').onclick = function() {
-          if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'notification_settings' }));
-          }
-        };
-        document.getElementById('admin-btn').onclick = function() {
-          if (window.Telegram && window.Telegram.WebApp) {
-            window.Telegram.WebApp.sendData(JSON.stringify({ type: 'admin_panel' }));
-          }
-        };
-        // Экспорт уже реализован через export-btn
     </script>
 
     <div id="export-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
