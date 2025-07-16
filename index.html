@@ -1803,6 +1803,58 @@
                 });
             });
 
+            // Регистрируем обработчики кнопок сразу при загрузке страницы
+            setTimeout(() => {
+                console.log('Регистрируем обработчики кнопок...');
+                const stakeBtn = document.getElementById('stake-btn');
+                const claimBtn = document.getElementById('claim-btn');
+                const statsBtn = document.getElementById('stats-btn');
+                const notifBtn = document.getElementById('notif-btn');
+                const adminBtn = document.getElementById('admin-btn');
+                
+                console.log('Найдены кнопки:', { stakeBtn, claimBtn, statsBtn, notifBtn, adminBtn });
+                
+                if (stakeBtn) {
+                    stakeBtn.onclick = function() {
+                        console.log('Клик по кнопке стейкинга');
+                        openStakeModal();
+                    };
+                    console.log('Обработчик стейкинга зарегистрирован');
+                }
+                
+                if (claimBtn) {
+                    claimBtn.onclick = function() {
+                        console.log('Клик по кнопке вывода наград');
+                        openClaimModal();
+                    };
+                    console.log('Обработчик вывода наград зарегистрирован');
+                }
+                
+                if (statsBtn) {
+                    statsBtn.onclick = function() {
+                        console.log('Клик по кнопке статистики');
+                        openStatsModal();
+                    };
+                    console.log('Обработчик статистики зарегистрирован');
+                }
+                
+                if (notifBtn) {
+                    notifBtn.onclick = function() {
+                        console.log('Клик по кнопке настроек уведомлений');
+                        openNotificationModal();
+                    };
+                    console.log('Обработчик настроек уведомлений зарегистрирован');
+                }
+                
+                if (adminBtn) {
+                    adminBtn.onclick = function() {
+                        console.log('Клик по кнопке админ-панели');
+                        openAdminModal();
+                    };
+                    console.log('Обработчик админ-панели зарегистрирован');
+                }
+            }, 1000);
+
             // --- TonConnect & Telegram WebApp Logic ---
             const tonConnectButton = document.getElementById('ton-connect-button');
             const fallbackConnect = document.getElementById('fallback-connect');
@@ -2144,54 +2196,240 @@
           const adminBtn = document.getElementById('admin-btn');
           if (userActions) userActions.style.display = 'block';
           if (adminBtn) adminBtn.style.display = isAdmin ? 'inline-block' : 'none';
+        }
+
+        // Функции открытия модальных окон
+        function openStakeModal() {
+          console.log('Открываем модальное окно стейкинга');
+          document.getElementById('stake-modal').style.display = 'flex';
+        }
+        
+        function closeStakeModal() {
+          document.getElementById('stake-modal').style.display = 'none';
+        }
+        
+        function openClaimModal() {
+          console.log('Открываем модальное окно вывода наград');
+          document.getElementById('claim-modal').style.display = 'flex';
+        }
+        
+        function closeClaimModal() {
+          document.getElementById('claim-modal').style.display = 'none';
+        }
+        
+        function openStatsModal() {
+          console.log('Открываем модальное окно статистики');
+          document.getElementById('stats-modal').style.display = 'flex';
+          loadStatsModal();
+        }
+        
+        function closeStatsModal() {
+          document.getElementById('stats-modal').style.display = 'none';
+        }
+        
+        function openNotificationModal() {
+          console.log('Открываем модальное окно настроек уведомлений');
+          document.getElementById('notification-modal').style.display = 'flex';
+        }
+        
+        function closeNotificationModal() {
+          document.getElementById('notification-modal').style.display = 'none';
+        }
+
+        // Функции для работы с модальными окнами
+        function executeStake() {
+          const amount = document.getElementById('stake-amount').value;
+          const duration = document.getElementById('stake-duration').value;
           
-          // Регистрируем обработчики кнопок
-          const stakeBtn = document.getElementById('stake-btn');
-          const claimBtn = document.getElementById('claim-btn');
-          const statsBtn = document.getElementById('stats-btn');
-          const notifBtn = document.getElementById('notif-btn');
-          const adminBtn2 = document.getElementById('admin-btn');
-          
-          if (stakeBtn) {
-            stakeBtn.onclick = function() {
-              if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'stake_phxpw' }));
-              }
-            };
+          if (!amount || amount <= 0) {
+            alert('Введите корректную сумму для стейкинга');
+            return;
           }
           
-          if (claimBtn) {
-            claimBtn.onclick = function() {
-              if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'claim_rewards' }));
-              }
+          // Здесь будет логика отправки в бота
+          if (window.Telegram && window.Telegram.WebApp) {
+            const payload = {
+              type: 'stake_phxpw',
+              amount: amount,
+              duration: duration
             };
-          }
-          
-          if (statsBtn) {
-            statsBtn.onclick = function() {
-              if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'user_stats' }));
-              }
-            };
-          }
-          
-          if (notifBtn) {
-            notifBtn.onclick = function() {
-              if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'notification_settings' }));
-              }
-            };
-          }
-          
-          if (adminBtn2) {
-            adminBtn2.onclick = function() {
-              if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.sendData(JSON.stringify({ type: 'admin_panel' }));
-              }
-            };
+            window.Telegram.WebApp.sendData(JSON.stringify(payload));
+            alert('Запрос на стейкинг отправлен в бота!');
+            closeStakeModal();
+          } else {
+            alert('Ошибка: сайт должен быть открыт через Telegram');
           }
         }
+        
+        function executeClaim() {
+          const amount = document.getElementById('claim-amount').value;
+          
+          if (!amount || amount <= 0) {
+            alert('Введите корректную сумму для вывода');
+            return;
+          }
+          
+          // Здесь будет логика отправки в бота
+          if (window.Telegram && window.Telegram.WebApp) {
+            const payload = {
+              type: 'claim_rewards',
+              amount: amount
+            };
+            window.Telegram.WebApp.sendData(JSON.stringify(payload));
+            alert('Запрос на вывод наград отправлен в бота!');
+            closeClaimModal();
+          } else {
+            alert('Ошибка: сайт должен быть открыт через Telegram');
+          }
+        }
+        
+        function saveNotificationSettings() {
+          const settings = {
+            rewards: document.getElementById('notif-rewards').checked,
+            pools: document.getElementById('notif-pools').checked,
+            lottery: document.getElementById('notif-lottery').checked,
+            price: document.getElementById('notif-price').checked,
+            daily: document.getElementById('notif-daily').checked
+          };
+          
+          // Здесь будет логика отправки в бота
+          if (window.Telegram && window.Telegram.WebApp) {
+            const payload = {
+              type: 'notification_settings',
+              settings: settings
+            };
+            window.Telegram.WebApp.sendData(JSON.stringify(payload));
+            alert('Настройки уведомлений сохранены!');
+            closeNotificationModal();
+          } else {
+            alert('Ошибка: сайт должен быть открыт через Telegram');
+          }
+        }
+        
+        // Расчет ожидаемой награды при изменении суммы или срока
+        document.addEventListener('DOMContentLoaded', function() {
+          const stakeAmount = document.getElementById('stake-amount');
+          const stakeDuration = document.getElementById('stake-duration');
+          const expectedReward = document.getElementById('expected-reward');
+          
+          function calculateReward() {
+            if (stakeAmount && stakeDuration && expectedReward) {
+              const amount = parseFloat(stakeAmount.value) || 0;
+              const duration = parseInt(stakeDuration.value) || 7;
+              
+              let multiplier = 1.1;
+              if (duration === 30) multiplier = 1.3;
+              else if (duration === 90) multiplier = 1.5;
+              else if (duration === 180) multiplier = 2.0;
+              
+              const reward = amount * (multiplier - 1);
+              expectedReward.textContent = reward.toFixed(6) + ' PHXPW';
+            }
+          }
+          
+          if (stakeAmount) stakeAmount.addEventListener('input', calculateReward);
+          if (stakeDuration) stakeDuration.addEventListener('change', calculateReward);
+        });
+        
+        // Загрузка статистики в модальное окно
+        async function loadStatsModal() {
+          const content = document.getElementById('stats-modal-content');
+          const tg_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+          
+          if (!tg_id) {
+            content.innerHTML = '<p style="color:var(--text-color-muted);">Ошибка: не удалось получить ID пользователя</p>';
+            return;
+          }
+          
+          try {
+            const res = await fetch(`/api/user_stats?tg_id=${tg_id}`);
+            if (!res.ok) throw new Error('Ошибка API');
+            const data = await res.json();
+            
+            content.innerHTML = `
+              <div style="text-align:left; margin:20px 0;">
+                <div style="background:rgba(255,72,0,0.1); border:1px solid rgba(255,72,0,0.3); border-radius:8px; padding:15px; margin:10px 0;">
+                  <p style="color:var(--text-color); margin:5px 0;"><strong>Баланс PHXPW:</strong> <span style="color:var(--lava-color-1);">${formatNumber(data.phxpw_balance)}</span></p>
+                  <p style="color:var(--text-color); margin:5px 0;"><strong>Баланс TON:</strong> <span style="color:var(--lava-color-1);">${formatNumber(data.total_spent_ton)}</span></p>
+                </div>
+                
+                <div style="background:rgba(255,72,0,0.1); border:1px solid rgba(255,72,0,0.3); border-radius:8px; padding:15px; margin:10px 0;">
+                  <p style="color:var(--text-color); margin:5px 0;"><strong>Ранг:</strong> <span style="color:var(--lava-color-1);">${data.loyalty_rank}</span></p>
+                  <p style="color:var(--text-color); margin:5px 0;"><strong>Комиссионные:</strong> <span style="color:var(--lava-color-1);">${formatNumber(data.total_commission_earned)}</span></p>
+                </div>
+                
+                <div style="background:rgba(255,72,0,0.1); border:1px solid rgba(255,72,0,0.3); border-radius:8px; padding:15px; margin:10px 0;">
+                  <p style="color:var(--text-color); margin:5px 0;"><strong>Курс TON:</strong> <span style="color:var(--lava-color-1);">$${formatNumber(data.ton_price)}</span></p>
+                  <p style="color:var(--text-color); margin:5px 0;"><strong>Курс PHXPW:</strong> <span style="color:var(--lava-color-1);">${formatNumber(data.phxpw_price)}</span></p>
+                </div>
+              </div>
+            `;
+          } catch (e) {
+            content.innerHTML = '<p style="color:var(--text-color-muted);">Ошибка загрузки статистики</p>';
+          }
+        }
+        
+        // Переопределяем функцию открытия статистики
+        function openStatsModal() {
+          document.getElementById('stats-modal').style.display = 'flex';
+          loadStatsModal();
+        }
+
+        // Добавляем обработчики для закрытия модальных окон
+        document.addEventListener('DOMContentLoaded', function() {
+          // Закрытие при клике вне окна
+          const modals = ['stake-modal', 'claim-modal', 'stats-modal', 'notification-modal', 'export-modal'];
+          
+          modals.forEach(modalId => {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+              modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                  modal.style.display = 'none';
+                }
+              });
+            }
+          });
+          
+          // Закрытие при клике на заголовок
+          const modalHeaders = document.querySelectorAll('#stake-modal h3, #claim-modal h3, #stats-modal h3, #notification-modal h3, #export-modal h3');
+          modalHeaders.forEach(header => {
+            header.style.cursor = 'pointer';
+            header.style.userSelect = 'none';
+            header.style.position = 'relative';
+            header.style.paddingRight = '30px';
+            
+            // Добавляем иконку закрытия
+            const closeIcon = document.createElement('span');
+            closeIcon.innerHTML = '✕';
+            closeIcon.style.position = 'absolute';
+            closeIcon.style.right = '0';
+            closeIcon.style.top = '50%';
+            closeIcon.style.transform = 'translateY(-50%)';
+            closeIcon.style.color = 'var(--text-color-muted)';
+            closeIcon.style.fontSize = '18px';
+            closeIcon.style.fontWeight = 'normal';
+            closeIcon.style.transition = 'color 0.3s ease';
+            
+            header.appendChild(closeIcon);
+            
+            // Эффекты при наведении
+            header.addEventListener('mouseenter', function() {
+              closeIcon.style.color = 'var(--lava-color-1)';
+            });
+            
+            header.addEventListener('mouseleave', function() {
+              closeIcon.style.color = 'var(--text-color-muted)';
+            });
+            
+            header.addEventListener('click', function() {
+              const modal = this.closest('[id$="-modal"]');
+              if (modal) {
+                modal.style.display = 'none';
+              }
+            });
+          });
+        });
     </script>
 
     <div id="export-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
@@ -2202,6 +2440,100 @@
         <button class="filter-btn secondary" style="margin:10px;" onclick="downloadExport('pdf')">PDF</button>
         <br>
         <button class="filter-btn" style="margin-top:20px; background:#333; color:#fff;" onclick="closeExportModal()">Отмена</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно стейкинга -->
+    <div id="stake-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#222; border-radius:12px; padding:30px 40px; min-width:300px; max-width:90vw; box-shadow:0 8px 32px rgba(255,72,0,0.2); text-align:center;">
+        <h3 style="color:var(--lava-color-1); margin-bottom:20px;">🔥 Стейкинг PHXPW</h3>
+        <p style="color:var(--text-color-muted); margin-bottom:20px;">Заблокируйте свои токены и получайте ежедневные награды</p>
+        
+        <div style="margin:20px 0; text-align:left;">
+          <label style="color:var(--text-color); display:block; margin-bottom:10px;">Сумма для стейкинга:</label>
+          <input type="number" id="stake-amount" placeholder="0.0" step="0.000001" style="width:100%; padding:12px; border:1px solid rgba(255,72,0,0.3); border-radius:8px; background:rgba(255,255,255,0.05); color:var(--text-color); margin-bottom:15px;">
+          
+          <label style="color:var(--text-color); display:block; margin-bottom:10px;">Срок блокировки:</label>
+          <select id="stake-duration" style="width:100%; padding:12px; border:1px solid rgba(255,72,0,0.3); border-radius:8px; background:rgba(255,255,255,0.05); color:var(--text-color); margin-bottom:15px;">
+            <option value="7">7 дней (коэффициент 1.1x)</option>
+            <option value="30">30 дней (коэффициент 1.3x)</option>
+            <option value="90">90 дней (коэффициент 1.5x)</option>
+            <option value="180">180 дней (коэффициент 2.0x)</option>
+          </select>
+        </div>
+        
+        <div style="background:rgba(255,72,0,0.1); border:1px solid rgba(255,72,0,0.3); border-radius:8px; padding:15px; margin:20px 0;">
+          <p style="color:var(--text-color); margin:0;"><strong>Ожидаемая награда:</strong> <span id="expected-reward" style="color:var(--lava-color-1);">0 PHXPW</span></p>
+        </div>
+        
+        <button class="filter-btn primary" style="margin:10px;" onclick="executeStake()">🔥 Застейкать</button>
+        <button class="filter-btn" style="margin:10px; background:#333; color:#fff;" onclick="closeStakeModal()">Отмена</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно вывода наград -->
+    <div id="claim-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#222; border-radius:12px; padding:30px 40px; min-width:300px; max-width:90vw; box-shadow:0 8px 32px rgba(255,72,0,0.2); text-align:center;">
+        <h3 style="color:var(--lava-color-1); margin-bottom:20px;">💰 Вывод наград</h3>
+        <p style="color:var(--text-color-muted); margin-bottom:20px;">Выведите заработанные награды на свой кошелек</p>
+        
+        <div style="background:rgba(255,72,0,0.1); border:1px solid rgba(255,72,0,0.3); border-radius:8px; padding:20px; margin:20px 0;">
+          <p style="color:var(--text-color); margin:5px 0;"><strong>Доступно для вывода:</strong> <span id="available-rewards" style="color:var(--lava-color-1);">0 PHXPW</span></p>
+          <p style="color:var(--text-color-muted); margin:5px 0; font-size:0.9em;">Награды начисляются ежедневно</p>
+        </div>
+        
+        <div style="margin:20px 0; text-align:left;">
+          <label style="color:var(--text-color); display:block; margin-bottom:10px;">Сумма для вывода:</label>
+          <input type="number" id="claim-amount" placeholder="0.0" step="0.000001" style="width:100%; padding:12px; border:1px solid rgba(255,72,0,0.3); border-radius:8px; background:rgba(255,255,255,0.05); color:var(--text-color); margin-bottom:15px;">
+        </div>
+        
+        <button class="filter-btn primary" style="margin:10px;" onclick="executeClaim()">💰 Вывести</button>
+        <button class="filter-btn" style="margin:10px; background:#333; color:#fff;" onclick="closeClaimModal()">Отмена</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно статистики -->
+    <div id="stats-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center; overflow-y:auto;">
+      <div style="background:#222; border-radius:12px; padding:30px 40px; min-width:300px; max-width:90vw; max-height:80vh; box-shadow:0 8px 32px rgba(255,72,0,0.2); text-align:center;">
+        <h3 style="color:var(--lava-color-1); margin-bottom:20px;">📊 Ваша статистика</h3>
+        <div id="stats-modal-content">
+          <p style="color:var(--text-color-muted);">Загрузка статистики...</p>
+        </div>
+        <button class="filter-btn" style="margin-top:20px; background:#333; color:#fff;" onclick="closeStatsModal()">Закрыть</button>
+      </div>
+    </div>
+
+    <!-- Модальное окно настроек уведомлений -->
+    <div id="notification-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+      <div style="background:#222; border-radius:12px; padding:30px 40px; min-width:300px; max-width:90vw; box-shadow:0 8px 32px rgba(255,72,0,0.2); text-align:center;">
+        <h3 style="color:var(--lava-color-1); margin-bottom:20px;">🔔 Настройки уведомлений</h3>
+        <p style="color:var(--text-color-muted); margin-bottom:20px;">Выберите, какие уведомления вы хотите получать</p>
+        
+        <div style="text-align:left; margin:20px 0;">
+          <label style="color:var(--text-color); display:flex; align-items:center; margin:15px 0; cursor:pointer;">
+            <input type="checkbox" id="notif-rewards" style="margin-right:10px;">
+            <span>Награды за стейкинг</span>
+          </label>
+          <label style="color:var(--text-color); display:flex; align-items:center; margin:15px 0; cursor:pointer;">
+            <input type="checkbox" id="notif-pools" style="margin-right:10px;">
+            <span>Новые стейкинг пулы</span>
+          </label>
+          <label style="color:var(--text-color); display:flex; align-items:center; margin:15px 0; cursor:pointer;">
+            <input type="checkbox" id="notif-lottery" style="margin-right:10px;">
+            <span>Лотереи и розыгрыши</span>
+          </label>
+          <label style="color:var(--text-color); display:flex; align-items:center; margin:15px 0; cursor:pointer;">
+            <input type="checkbox" id="notif-price" style="margin-right:10px;">
+            <span>Изменения цены PHXPW</span>
+          </label>
+          <label style="color:var(--text-color); display:flex; align-items:center; margin:15px 0; cursor:pointer;">
+            <input type="checkbox" id="notif-daily" style="margin-right:10px;">
+            <span>Ежедневные напоминания</span>
+          </label>
+        </div>
+        
+        <button class="filter-btn primary" style="margin:10px;" onclick="saveNotificationSettings()">💾 Сохранить</button>
+        <button class="filter-btn" style="margin:10px; background:#333; color:#fff;" onclick="closeNotificationModal()">Отмена</button>
       </div>
     </div>
 </body>
