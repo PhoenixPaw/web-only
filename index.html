@@ -2247,13 +2247,13 @@
           }
           
           // Здесь будет логика отправки в бота
-          if (window.Telegram && window.Telegram.WebApp) {
-            const payload = {
+                        if (window.Telegram && window.Telegram.WebApp) {
+                            const payload = {
               type: 'stake_phxpw',
               amount: amount,
               duration: duration
-            };
-            window.Telegram.WebApp.sendData(JSON.stringify(payload));
+                            };
+                            window.Telegram.WebApp.sendData(JSON.stringify(payload));
             alert('Запрос на стейкинг отправлен в бота!');
             closeStakeModal();
           } else {
