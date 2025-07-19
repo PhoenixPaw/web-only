@@ -315,6 +315,80 @@
                 `;
             }
         }
+
+        // Функция для тестирования отправки данных в бота
+        function testBotConnection() {
+            console.log('🔍 Тестируем связь с ботом...');
+            
+            if (!window.Telegram || !window.Telegram.WebApp) {
+                console.log('❌ Telegram WebApp недоступен');
+                alert('❌ Telegram WebApp недоступен. Откройте сайт через Telegram бота.');
+                return;
+            }
+            
+            const testData = {
+                type: 'test_connection',
+                message: 'Тест связи с ботом',
+                timestamp: new Date().toISOString(),
+                user_id: window.Telegram.WebApp.initDataUnsafe?.user?.id || 'неизвестен'
+            };
+            
+            console.log('📤 Отправляем тестовые данные:', testData);
+            
+            try {
+                window.Telegram.WebApp.sendData(JSON.stringify(testData));
+                console.log('✅ Данные отправлены в бота');
+                alert('✅ Тестовые данные отправлены в бота! Проверьте сообщения от бота.');
+            } catch (error) {
+                console.error('❌ Ошибка отправки данных:', error);
+                alert('❌ Ошибка отправки данных: ' + error.message);
+            }
+        }
+
+        // Функция для принудительного создания пользователя
+        async function forceCreateUser() {
+            console.log('🔍 Принудительно создаем пользователя...');
+            
+            const tg_id = window.Telegram?.WebApp?.initDataUnsafe?.user?.id;
+            if (!tg_id) {
+                alert('❌ Не удалось получить ID пользователя');
+                return;
+            }
+            
+            try {
+                // Сначала проверяем, есть ли пользователь
+                const checkResponse = await fetch(`/api/user_stats?tg_id=${tg_id}`);
+                if (checkResponse.status === 404) {
+                    console.log('🔍 Пользователь не найден, создаем...');
+                    
+                    // Создаем пользователя через API
+                    const createResponse = await fetch('/api/create_user', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            tg_id: tg_id,
+                            wallet_address: ''
+                        })
+                    });
+                    
+                    if (createResponse.ok) {
+                        console.log('✅ Пользователь создан');
+                        alert('✅ Пользователь создан! Теперь попробуйте загрузить статистику.');
+                    } else {
+                        console.log('❌ Ошибка создания пользователя:', createResponse.status);
+                        alert('❌ Ошибка создания пользователя: ' + createResponse.status);
+                    }
+                } else {
+                    console.log('✅ Пользователь уже существует');
+                    alert('✅ Пользователь уже существует! Попробуйте загрузить статистику.');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка:', error);
+                alert('❌ Ошибка: ' + error.message);
+            }
+        }
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
@@ -1817,6 +1891,12 @@
                     <div style="color: #ff4800; text-align: center; padding: 20px; background: rgba(255,72,0,0.1); border-radius: 8px; margin: 10px;">
                         <p>⚠️ Не удалось получить ID пользователя</p>
                         <p style="font-size: 0.9em; color: #ccc;">Статистика не будет обновляться</p>
+                    </div>
+                    <div style="text-align: center; margin: 20px 0; padding: 15px; background: rgba(255,72,0,0.1); border-radius: 8px; border: 1px solid rgba(255,72,0,0.3);">
+                        <p style="color: #ff4800; margin: 5px 0;"><strong>🔧 Режим диагностики</strong></p>
+                        <p style="color: #ccc; font-size: 0.9em; margin: 5px 0;">Используйте эти кнопки для диагностики проблем</p>
+                        <button onclick="testBotConnection()" style="background: #ff4800; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin: 5px; cursor: pointer;">Тест связи с ботом</button>
+                        <button onclick="forceCreateUser()" style="background: #31a0d9; color: white; border: none; padding: 8px 16px; border-radius: 4px; margin: 5px; cursor: pointer;">Создать пользователя</button>
                     </div>
                     <a href="https://t.me/staking_PWbot?start=stake" target="_blank" class="return-button visible" style="margin:10px;" data-i18n="stake_phxpw">Застейкать PHXPW</a>
                     <a href="https://t.me/staking_PWbot?start=claim" target="_blank" class="return-button visible" style="margin:10px; background:#31a0d9;" data-i18n="claim_rewards">Вывести награду</a>
